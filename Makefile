@@ -9,7 +9,10 @@ ex3_o="ex3/ex3"
 ex4_s="ex4/ex4.c"
 ex4_o="ex4/ex4"
 
-all: example2 example3 example4
+ex5_s="ex5/ex5.c"
+ex5_o="ex5/ex5"
+
+all: example2 example3 example4 example5
 
 example2:
 	cc $(ex2_s) -o $(ex2_o) $(CFLAGS)
@@ -20,7 +23,11 @@ example3:
 example4:
 	cc $(ex4_s) -o $(ex4_o) $(CFLAGS)
 
+example5:
+	cc $(ex5_s) -o $(ex5_o) $(CFLAGS)
+
 clean:
 	rm -f $(ex2_o)
 	rm -f $(ex3_o)
 	rm -f $(ex4_o)
+	rm -f $(ex5_o)
