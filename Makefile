@@ -1,19 +1,19 @@
 CFLAGS=-Wall -g
 
 ex2_s="ex2/ex2.c"
-ex2_o="ex2/ex2"
+ex2_o="bin/ex2"
 
 ex3_s="ex3/ex3.c"
-ex3_o="ex3/ex3"
+ex3_o="bin/ex3"
 
 ex4_s="ex4/ex4.c"
-ex4_o="ex4/ex4"
+ex4_o="bin/ex4"
 
 ex5_s="ex5/ex5.c"
-ex5_o="ex5/ex5"
+ex5_o="bin/ex5"
 
 ex6_s="ex6/ex6.c"
-ex6_o="ex6/ex6"
+ex6_o="bin/ex6"
 
 all: example2 example3 example4 example5 example6
 
