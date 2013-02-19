@@ -30,8 +30,11 @@ ex10_o="bin/ex10"
 ex11_s="ex11/ex11.c"
 ex11_o="bin/ex11"
 
+ex12_s="ex12/ex12.c"
+ex12_o="bin/ex12"
+
 all: example2 example3 example4 example5 example6 example7 example8 \
-	example9 example10 example11
+	example9 example10 example11 example12
 
 pre:
 	if [ ! -d "bin" ];then mkdir bin; fi;
@@ -66,6 +69,9 @@ example10: pre
 example11: pre
 	cc $(ex11_s) -o $(ex11_o) $(CFLAGS)
 
+example12: pre
+	cc $(ex12_s) -o $(ex12_o) $(CFLAGS)
+
 clean:
 	rm -f $(ex2_o)
 	rm -f $(ex3_o)
@@ -77,3 +83,4 @@ clean:
 	rm -f $(ex9_o)
 	rm -f $(ex10_o)
 	rm -f $(ex11_o)
+	rm -f $(ex12_o)
