@@ -24,8 +24,11 @@ ex8_o="bin/ex8"
 ex9_s="ex9/ex9.c"
 ex9_o="bin/ex9"
 
+ex10_s="ex10/ex10.c"
+ex10_o="bin/ex10"
+
 all: example2 example3 example4 example5 example6 example7 example8 \
-	example9
+	example9 example10
 
 pre:
 	if [ ! -d "bin" ];then mkdir bin; fi;
@@ -54,6 +57,9 @@ example8: pre
 example9: pre
 	cc $(ex9_s) -o $(ex9_o) $(CFLAGS)
 
+example10: pre
+	cc $(ex10_s) -o $(ex10_o) $(CFLAGS)
+
 clean:
 	rm -f $(ex2_o)
 	rm -f $(ex3_o)
@@ -63,3 +69,4 @@ clean:
 	rm -f $(ex7_o)
 	rm -f $(ex8_o)
 	rm -f $(ex9_o)
+	rm -f $(ex10_o)
