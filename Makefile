@@ -36,6 +36,9 @@ ex12_o="bin/ex12"
 ex13_s="ex13/ex13.c"
 ex13_o="bin/ex13"
 
+ex13a_s="ex13/ex13a.c"
+ex13a_o="bin/ex13a"
+
 all: example2 example3 example4 example5 example6 example7 example8 \
 	example9 example10 example11 example12 example13
 
@@ -77,6 +80,7 @@ example12: pre
 
 example13: pre
 	cc $(ex13_s) -o $(ex13_o) $(CFLAGS)
+	cc $(ex13a_s) -o $(ex13a_o) $(CFLAGS)
 
 clean:
 	rm -f $(ex2_o)
@@ -91,3 +95,4 @@ clean:
 	rm -f $(ex11_o)
 	rm -f $(ex12_o)
 	rm -f $(ex13_o)
+	rm -f $(ex13a_o)
