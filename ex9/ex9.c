@@ -49,5 +49,21 @@ int main(int argc, char *argv[])
 			another[0], another[1],
 			another[2], another[3]);
 
+	// extra credit
+	printf("extra credit: treating char name[4] as an int");
+	printf("sizeof int: %ld\n", sizeof(int));
+	printf("sizeof numbers[]: %ld\n", sizeof(numbers));
+	printf("size of name[]: %ld\n", sizeof(name));
+
+	printf("'D' = %d\n", 'D');
+	printf("'a' = %d\n", 'a');
+	printf("'n' = %d\n", 'n');
+	printf("nul byte = %d\n", '\0');
+
+	int name_two = 'D' | 'a' << 8 | 'n' << 16;
+
+	printf("name_two int: %d\n", name_two);
+	printf("name_two each: %c %c %c\n", name_two, name_two >> 8, name_two >> 16);
+
 	return 0;
 }
