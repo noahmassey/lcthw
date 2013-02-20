@@ -31,6 +31,19 @@ struct Person *Person_create(char *name, int age, int height, int weight)
 	return who;
 }
 
+// Create and return a Person structure (on the STACK)
+// (extra credit)
+struct Person Person_create_stack(char *name, int age, int height, int weight)
+{
+	struct Person who;
+	who.name = name;
+	who.age = age;
+	who.height = height;
+	who.weight = weight;
+
+	return who;
+}
+
 // Destory a Person structure (freeing memory)
 void Person_destroy(struct Person *who)
 {
@@ -48,6 +61,15 @@ void Person_print(struct Person *who)
 	printf("\tAge: %d\n", who->age);
 	printf("\tHeight: %d\n", who->height);
 	printf("\tWeight: %d\n", who->weight);
+}
+
+// Print out a Person structure (STACK)
+void Person_print_stack(struct Person who)
+{
+	printf("Name: %s\n", who.name);
+	printf("\tAge: %d\n", who.age);
+	printf("\tHeight: %d\n", who.height);
+	printf("\tWeight: %d\n", who.weight);
 }
 
 int main(int agrc, char *argv[])
@@ -77,8 +99,18 @@ int main(int agrc, char *argv[])
 	Person_print(frank);
 
 	// destroy them both so we clean up
+	printf("\nDestroying joe and frank\n");
 	Person_destroy(joe);
 	Person_destroy(frank);
+
+	// Person on the stack
+	struct Person dan = Person_create_stack(
+			"Dan Jarvis", 28, 70, 165);
+
+	printf("Dan is at memory location: %p\n", &dan);
+	Person_print_stack(dan);
+
+	// Since dan was created on the stack, we do not need to manually destroy him
 
 	return 0;
 }
