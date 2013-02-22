@@ -72,6 +72,9 @@ struct Connection *Database_new(const char *filename, int max_data, int max_rows
 
 struct Connection *Database_open(const char *filename)
 {
+	int rc = 0;
+	int i = 0;
+
 	struct Connection *conn = malloc(sizeof(struct Connection));
 	if (!conn)
 		die("Memory error", conn);
@@ -81,14 +84,52 @@ struct Connection *Database_open(const char *filename)
 		die("Memory error", conn);
 
 	conn->file = fopen(filename, "r+");
-
-	conn->db->rows = (struct Address **) calloc(conn->db->max_rows, sizeof(struct Address *));
-
 	if (!conn->file)
 		die("Failed to open the file", conn);
-	int rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
+
+	// Read db->max_data & db->max_rows
+	rc = fread(&conn->db->max_data, sizeof(int), 1, conn->file);
 	if (rc != 1)
-		die("Failed to load database", conn);
+		die("Failed to read max_data from database", conn);
+	rc = fread(&conn->db->max_rows, sizeof(int), 1, conn->file);
+	if (rc != 1)
+		die("Failed to read max_rows from database", conn);
+
+	// Read addresses
+	conn->db->rows = (struct Address **) calloc(conn->db->max_rows, sizeof(struct Address *));
+	if (!conn->db->rows)
+		die("Memory error", conn);
+
+	int *id = malloc(sizeof(int *));
+	int failed = 0;
+	for (i = 0; i < conn->db->max_rows; i++) {
+		rc = fread(id, sizeof(int), 1, conn->file);
+		if (rc != 1) {
+			failed = 1;
+			break;
+		}
+
+		// Read name & email if id is set (we wrote -1 on Database_write())
+		if (*id == -1)
+			continue;
+
+		conn->db->rows[i]->id = i;
+		rc = fread(conn->db->rows[i]->name, sizeof(char), conn->db->max_data, conn->file);
+		if (rc != 1) {
+			failed = 1;
+			break;
+		}
+		rc = fread(conn->db->rows[i]->email, sizeof(char), conn->db->max_data, conn->file);
+		if (rc != 1) {
+			failed = 1;
+			break;
+		}
+	}
+
+	free(id);
+
+	if (failed)
+		die("Failed to read database", conn);
 
 	return conn;
 }
