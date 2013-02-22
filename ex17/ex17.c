@@ -114,6 +114,15 @@ void Database_write(struct Connection *conn)
 	int nope = -1;
 
 	rewind(conn->file);
+
+	rc = fwrite(&conn->db->max_data, sizeof(int), 1, conn->file);
+	if (rc != 1)
+		die("Failed to write max_data to the database", conn);
+
+	rc = fwrite(&conn->db->max_rows, sizeof(int), 1, conn->file);
+	if (rc != 1)
+		die("Failed to write max_rows to the database", conn);
+
 	for (i = 0; i < conn->db->max_rows; i++) {
 		if (conn->db->rows[i] == NULL) {
 			rc = fwrite(&nope, sizeof(nope), 1, conn->file);
@@ -133,11 +142,6 @@ void Database_write(struct Connection *conn)
 		if (rc != 1)
 			die("Failed to write email to the database", conn);
 	}
-
-
-	rc = fwrite(conn->db, sizeof(struct Database *), 1, conn->file);
-	if (rc != 1)
-		die("Failed to write to the database",conn);
 
 	rc = fflush(conn->file);
 	if (rc == -1)
