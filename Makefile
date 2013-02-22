@@ -1,127 +1,149 @@
 CFLAGS=-Wall -g
 
-ex2_s="ex2/ex2.c"
-ex2_o="bin/ex2"
+ex2_s=ex2/ex2.c
+ex2_o=bin/ex2
 
-ex3_s="ex3/ex3.c"
-ex3_o="bin/ex3"
+BINARIES += $(ex2_o)
 
-ex4_s="ex4/ex4.c"
-ex4_o="bin/ex4"
+ex3_s=ex3/ex3.c
+ex3_o=bin/ex3
 
-ex5_s="ex5/ex5.c"
-ex5_o="bin/ex5"
+BINARIES += $(ex3_o)
 
-ex6_s="ex6/ex6.c"
-ex6_o="bin/ex6"
+ex4_s=ex4/ex4.c
+ex4_o=bin/ex4
 
-ex7_s="ex7/ex7.c"
-ex7_o="bin/ex7"
+BINARIES += $(ex4_o)
 
-ex8_s="ex8/ex8.c"
-ex8_o="bin/ex8"
+ex5_s=ex5/ex5.c
+ex5_o=bin/ex5
 
-ex9_s="ex9/ex9.c"
-ex9_o="bin/ex9"
+BINARIES += $(ex5_o)
 
-ex10_s="ex10/ex10.c"
-ex10_o="bin/ex10"
+ex6_s=ex6/ex6.c
+ex6_o=bin/ex6
 
-ex11_s="ex11/ex11.c"
-ex11_o="bin/ex11"
+BINARIES += $(ex6_o)
 
-ex12_s="ex12/ex12.c"
-ex12_o="bin/ex12"
+ex7_s=ex7/ex7.c
+ex7_o=bin/ex7
 
-ex13_s="ex13/ex13.c"
-ex13_o="bin/ex13"
+BINARIES += $(ex7_o)
 
-ex13a_s="ex13/ex13a.c"
-ex13a_o="bin/ex13a"
+ex8_s=ex8/ex8.c
+ex8_o=bin/ex8
 
-ex14_s="ex14/ex14.c"
-ex14_o="bin/ex14"
+BINARIES += $(ex8_o)
 
-ex15_s="ex15/ex15.c"
-ex15_o="bin/ex15"
+ex9_s=ex9/ex9.c
+ex9_o=bin/ex9
 
-ex16_s="ex16/ex16.c"
-ex16_o="bin/ex16"
+BINARIES += $(ex9_o)
 
-ex17_s="ex17/ex17.c"
-ex17_o="bin/ex17"
+ex10_s=ex10/ex10.c
+ex10_o=bin/ex10
 
-all: example2 example3 example4 example5 example6 example7 example8 \
-	example9 example10 example11 example12 example13 example14 example15 \
-	example16 example17
+BINARIES += $(ex10_o)
 
-pre:
-	if [ ! -d "bin" ];then mkdir bin; fi;
+ex11_s=ex11/ex11.c
+ex11_o=bin/ex11
 
-example2: pre
-	cc $(ex2_s) -o $(ex2_o) $(CFLAGS)
+BINARIES += $(ex11_o)
 
-example3: pre
-	cc $(ex3_s) -o $(ex3_o) $(CFLAGS)
+ex12_s=ex12/ex12.c
+ex12_o=bin/ex12
 
-example4: pre
-	cc $(ex4_s) -o $(ex4_o) $(CFLAGS)
+BINARIES += $(ex12_o)
 
-example5: pre
-	cc $(ex5_s) -o $(ex5_o) $(CFLAGS)
+ex13_s=ex13/ex13.c
+ex13_o=bin/ex13
 
-example6: pre
-	cc $(ex6_s) -o $(ex6_o) $(CFLAGS)
+BINARIES += $(ex13_o)
 
-example7: pre
-	cc $(ex7_s) -o $(ex7_o) $(CFLAGS)
+ex13a_s=ex13/ex13a.c
+ex13a_o=bin/ex13a
 
-example8: pre
-	cc $(ex8_s) -o $(ex8_o) $(CFLAGS)
+BINARIES += $(ex13a_o)
 
-example9: pre
-	cc $(ex9_s) -o $(ex9_o) $(CFLAGS)
+ex14_s=ex14/ex14.c
+ex14_o=bin/ex14
 
-example10: pre
-	cc $(ex10_s) -o $(ex10_o) $(CFLAGS)
+BINARIES += $(ex14_o)
 
-example11: pre
-	cc $(ex11_s) -o $(ex11_o) $(CFLAGS)
+ex15_s=ex15/ex15.c
+ex15_o=bin/ex15
 
-example12: pre
-	cc $(ex12_s) -o $(ex12_o) $(CFLAGS)
+BINARIES += $(ex15_o)
 
-example13: pre
-	cc $(ex13_s) -o $(ex13_o) $(CFLAGS)
-	cc $(ex13a_s) -o $(ex13a_o) $(CFLAGS)
+ex16_s=ex16/ex16.c
+ex16_o=bin/ex16
 
-example14: pre
-	cc $(ex14_s) -o $(ex14_o) $(CFLAGS)
+BINARIES += $(ex16_o)
 
-example15: pre
-	cc $(ex15_s) -o $(ex15_o) $(CFLAGS)
+ex17_s=ex17/ex17.c
+ex17_o=bin/ex17
 
-example16: pre
-	cc $(ex16_s) -o $(ex16_o) $(CFLAGS)
+BINARIES += $(ex17_o)
 
-example17: pre
-	cc $(ex17_s) -o $(ex17_o) $(CFLAGS)
+all: bin $(BINARIES)
+
+bin:
+	mkdir bin
+
+$(ex2_o): $(ex2_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex3_o): $(ex3_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex4_o): $(ex4_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex5_o): $(ex5_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex6_o): $(ex6_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex7_o): $(ex7_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex8_o): $(ex8_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex9_o): $(ex9_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex10_o): $(ex10_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex11_o): $(ex11_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex12_o): $(ex12_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex13_o): $(ex13_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex13a_o): $(ex13a_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex14_o): $(ex14_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex15_o): $(ex15_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex16_o): $(ex16_s)
+	cc $< -o $@ $(CFLAGS)
+$(ex17_o): $(ex17_s)
+	cc $< -o $@ $(CFLAGS)
+
+
+example2: bin $(ex2_o)
+example3: bin $(ex3_o)
+example4: bin $(ex4_o)
+example5: bin $(ex5_o)
+example6: bin $(ex6_o)
+example7: bin $(ex7_o)
+example8: bin $(ex8_o)
+example9: bin $(ex9_o)
+example10: bin $(ex10_o)
+example11: bin $(ex11_o)
+example12: bin $(ex12_o)
+example13: bin $(ex13_o)
+example13a: bin $(ex13a_o)
+example14: bin $(ex14_o)
+example15: bin $(ex15_o)
+example16: bin $(ex16_o)
+example17: bin $(ex17_o)
 
 clean:
-	rm -f $(ex2_o)
-	rm -f $(ex3_o)
-	rm -f $(ex4_o)
-	rm -f $(ex5_o)
-	rm -f $(ex6_o)
-	rm -f $(ex7_o)
-	rm -f $(ex8_o)
-	rm -f $(ex9_o)
-	rm -f $(ex10_o)
-	rm -f $(ex11_o)
-	rm -f $(ex12_o)
-	rm -f $(ex13_o)
-	rm -f $(ex13a_o)
-	rm -f $(ex14_o)
-	rm -f $(ex15_o)
-	rm -f $(ex16_o)
-	rm -f $(ex17_o)
+	rm -f $(BINARIES)
+	rmdir bin
