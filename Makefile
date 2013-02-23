@@ -11,6 +11,4 @@ $(SUBDIRS): bin
 	$(MAKE) -C $@
 
 clean:
-	for dir in $(SUBDIRS); do \
-		$(MAKE) clean -C $$dir; \
-	done
+	@for dir in $(SUBDIRS); do $(MAKE) $@ -C $$dir; done
