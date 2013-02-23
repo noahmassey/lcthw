@@ -130,14 +130,20 @@ Connection *Database_open(const char *filename)
 			failed = 1;
 			break;
 		}
-		conn->db->rows[i]->name = strndup(data_buffer, conn->db->max_data);
+		if (*id != -1)
+			conn->db->rows[i]->name = strndup(data_buffer, conn->db->max_data);
+		else
+			conn->db->rows[i]->name = NULL;
 
 		rc = fread(data_buffer, sizeof(char), conn->db->max_data, conn->file);
 		if (rc != conn->db->max_data) {
 			failed = 1;
 			break;
 		}
-		conn->db->rows[i]->email = strndup(data_buffer, conn->db->max_data);
+		if (*id != -1)
+			conn->db->rows[i]->email = strndup(data_buffer, conn->db->max_data);
+		else
+			conn->db->rows[i]->email = NULL;
 	}
 
 	free(data_buffer);
@@ -279,7 +285,7 @@ void Database_list(Connection *conn)
 	for (i = 0; i < conn->db->max_rows; i++) {
 		Address *cur = conn->db->rows[i];
 
-		if (cur) {
+		if (cur && cur->id != -1) {
 			Address_print(cur);
 			count++;
 		}
