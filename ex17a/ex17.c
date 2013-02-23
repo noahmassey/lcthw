@@ -1,27 +1,42 @@
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 
-#define MAX_DATA 512
-#define MAX_ROWS 100
+#define NUM_FIELDS 2
+#define ADDR_HEADER_SIZE (sizeof(int) * 2)
+#define DB_HEADER_SIZE (sizeof(int) * 2)
+
+#define record_size(md) ((md) * NUM_FIELDS + 2 * sizeof(int))
+#define database_size(db) (record_size((db)->max_data) * (db)->max_rows + DB_HEADER_SIZE)
 
 struct Address {
 	int id;
 	int set;
-	char *name;
-	char *email;
+	const char *name;
+	const char *email;
 };
+
+typedef struct {
+	int set;
+	int id;
+	char data[];
+} StoredAddress;
 
 struct Database {
 	int max_rows;
 	int max_data;
-	struct Address *rows;
+	char rows[];
 };
 
 struct Connection {
-	FILE *file;
+	int fd;
 	struct Database *db;
 };
 
@@ -37,48 +52,34 @@ void die(struct Connection * conn, const char *message)
 	exit(1);
 }
 
+
 void Address_print(struct Address *addr)
 {
 	printf("%d %s %s\n",
 			addr->id, addr->name, addr->email);
 }
 
+void SAddress_print(StoredAddress *addr, int field_size)
+{
+	printf("%d %s %s\n",
+		addr->id, addr->data, addr->data + field_size);
+}
+
+struct Address * Address_load(struct Database * db, StoredAddress * stored)
+{
+	struct Address * rvalue = malloc(sizeof(struct Address));
+	rvalue->set = stored->set;
+	rvalue->id = stored->id;
+	rvalue->name = stored->data;
+	rvalue->email = stored->data + db->max_data;
+	return rvalue;
+}
+
 void Database_load(struct Connection *conn)
 {
-	struct Database * db = conn->db;
-	struct Address *addr;
-	char * buffer;
-	int rc;
-	int i;
-	rc = fread(db, sizeof(int), 2, conn->file);
-	if (rc != 2)
-		die(conn, "Failed to load database");
-	db->rows = malloc(sizeof(struct Address) * db->max_rows);
-	buffer = malloc(sizeof(char) * db->max_data);
-	for(i = db->max_rows, addr = db->rows; i; i--,addr++) {
-		rc = fread(addr, sizeof(int), 2, conn->file);
-		if (rc != 2)
-			goto die;
-		if (! addr->set) {
-			addr->name = NULL;
-			addr->email = NULL;
-			fseek(conn->file, 2 * db->max_data, SEEK_CUR);
-			continue;
-		}
-		rc = fread(buffer, sizeof(char), db->max_data, conn->file);
-		if (rc != db->max_data)
-			goto die;
-		addr->name = strndup(buffer, db->max_data);
-		rc = fread(buffer, sizeof(char), db->max_data, conn->file);
-		if (rc != db->max_data)
-			goto die;
-		addr->email = strndup(buffer, db->max_data);
-	}
-	free(buffer);
-	return;
-die:
-	free(buffer);
-	die(conn, "Failed to load database");
+	struct Database * header = mmap(NULL, DB_HEADER_SIZE, PROT_READ, MAP_PRIVATE, conn->fd, 0);
+	conn->db = mmap(NULL, database_size(header), PROT_READ | PROT_WRITE, MAP_SHARED, conn->fd, 0);
+	munmap(header, DB_HEADER_SIZE);
 }
 
 struct Connection *Database_open(const char *filename, char mode)
@@ -87,139 +88,94 @@ struct Connection *Database_open(const char *filename, char mode)
 	if (!conn)
 		die(NULL, "Memory error");
 
-	conn->db = malloc(sizeof(struct Database));
-	if (!conn->db)
-		die(conn, "Memory error");
-
 	if (mode == 'c') {
-		conn->file = fopen(filename, "w");
+		conn->fd = creat(filename, S_IRUSR|S_IWUSR);
 	} else {
-		conn->file = fopen(filename, "r+");
+		conn->fd = open(filename, O_RDWR);
 
-		if (conn->file) {
+		if (-1 < conn->fd) {
 			Database_load(conn);
 		}
 	}
 
-	if (!conn->file)
+	if (conn->fd < 0)
 		die(conn, "Failed to open the file");
 
 	return conn;
 }
 
-void Database_free(struct Database * db)
-{
-	if (db->rows) {
-		int i = 0;
-		while(i < db->max_rows) {
-			struct Address * addr = &db->rows[i++];
-			if (addr->name)
-				free(addr->name);
-			if (addr->email)
-				free(addr->email);
-		}
-		free(db->rows);
-	}
-	free(db);
-}
-
 void Database_close(struct Connection *conn)
 {
 	if (conn) {
-		if (conn->file) fclose(conn->file);
+		if (conn->fd > -1) close(conn->fd);
 		if (conn->db)
-			Database_free(conn->db);
+			munmap(conn->db, database_size(conn->db));	
 		free(conn);
 	}
 }
 
 void Database_write(struct Connection *conn)
 {
-	int rc;
-	struct Database *db = conn->db;
-	struct Address *cur;
-	int i;
-	char * buffer;
-	rewind(conn->file);
-
-	rc = fwrite(db, sizeof(int), 2, conn->file);
-	if (rc != 2) die(conn, "Failed to write to the database");
-
-	buffer = malloc(sizeof(char) * db->max_data);
-	for (i = db->max_rows, cur = db->rows; i != 0; i--, cur++) {
-		rc = fwrite(cur, sizeof(int), 2, conn->file);
-		if (rc != 2) {
-			free(buffer);
-			die(conn, "Failed to write to the database");
-		}
-		memset(buffer, 0, db->max_data);
-		if (cur->name)
-			strncpy(buffer, cur->name, db->max_data);
-		rc = fwrite(buffer, sizeof(char), db->max_data, conn->file);
-		if (rc != db->max_data) {
-			free(buffer);
-			die(conn, "Failed to write to the database");
-		}
-		memset(buffer, 0, db->max_data);
-		if (cur->email)
-			strncpy(buffer, cur->email, db->max_data);
-		rc = fwrite(buffer, sizeof(char), db->max_data, conn->file);
-		if (rc != db->max_data) {
-			free(buffer);
-			die(conn, "Failed to write to the database");
-		}
-	}
-	free(buffer);
-	rc = fflush(conn->file);
-	if (rc == -1) die(conn, "Cannot flush database");
+	// bwahahahahahahah
 }
 
 void Database_create(struct Connection *conn, int max_rows, int max_data)
 {
-	int i = 0;
-	struct Database * db = conn->db;
+	int i;
+	struct Database db = {
+		.max_rows = max_rows,
+		.max_data = max_data,
+	};
+	if (DB_HEADER_SIZE != write(conn->fd, &db, DB_HEADER_SIZE))
+		die(conn, "Failed creating database");
 
-	db->max_rows = max_rows;
-	db->max_data = max_data;
-	db->rows = malloc(sizeof(struct Address) * max_rows);
 	for (i = 0; i < max_rows; i++) {
 		// make a prototype to initialize it
-		struct Address addr = { .id = i, .set = 0 };
-		
-		// then just assign it
-		conn->db->rows[i] = addr;
+		StoredAddress addr = {
+			.id = i,
+			.set = 0,
+		};
+		ssize_t written = write(conn->fd, &addr, ADDR_HEADER_SIZE);
+		if (written != ADDR_HEADER_SIZE)
+			die(conn, "Failed creating database");
+		lseek(conn->fd, NUM_FIELDS * max_data, SEEK_CUR);
 	}
+	// write last byte of file to ensure file size
+	if (max_rows > 0) {
+		char c=0;
+		lseek(conn->fd, -1, SEEK_CUR);
+		write(conn->fd, &c, 1);
+	} 
 }
 
 void Database_set(struct Connection *conn, int id, const char *name, const char *email)
 {
-	struct Address *addr;
+	StoredAddress *addr;
+	int max_data = conn->db->max_data;
 
 	if (!(id < conn->db->max_rows))
 		die(conn, "There aren't that many records");
-	addr = &conn->db->rows[id];
+	addr = (StoredAddress*) (conn->db->rows + (id * record_size(max_data)));
 	if (addr->set)
 		die(conn, "Already set, delete it first");
 
 	addr->set = 1;
 
-	addr->name = strndup(name, conn->db->max_data);
-	addr->email = strndup(email, conn->db->max_data);
-	if (!(addr->name && addr->email))
-		die(conn, "Out of memory");
+	strncpy(addr->data, name, max_data -1);
+	strncpy(addr->data + max_data, email, max_data - 1);
 }
 
 void Database_get(struct Connection *conn, int id)
 {
-	struct Address *addr;
+	StoredAddress *addr;
 
 	if (!(id < conn->db->max_rows))
 		die(conn, "There aren't that many records");
 
-	addr = &conn->db->rows[id];
+	addr = (StoredAddress*) (conn->db->rows + (id * record_size(conn->db->max_data)));
 
 	if (addr->set) {
-		Address_print(addr);
+		SAddress_print(addr, conn->db->max_data);
 	} else {
 		die(conn, "ID is not set");
 	}
@@ -227,33 +183,28 @@ void Database_get(struct Connection *conn, int id)
 
 void Database_delete(struct Connection *conn, int id)
 {
-	struct Address *addr;
+	StoredAddress *addr;
 
 	if (!(id < conn->db->max_rows))
 		die(conn, "There aren't that many records");
-	addr = &conn->db->rows[id];
+	addr = (StoredAddress*) (conn->db->rows + (id * record_size(conn->db->max_data)));
 	addr->set = 0;
-	if (addr->name) {
-		free(addr->name);
-		addr->name = NULL;
-	}
-	if (addr->email) {
-		free(addr->email);
-		addr->email = NULL;
-	}
+	memset(addr->data, 0, NUM_FIELDS * conn->db->max_data);
 }
 
 void Database_list(struct Connection *conn)
 {
-	int i;
 	struct Database *db = conn->db;
-	struct Address *cur;
+	int max_data = db->max_data;
+	int i = db->max_rows;
+	StoredAddress *cur = (StoredAddress *) db->rows;
 
-	for (i = db->max_rows, cur = db->rows; i != 0; i--, cur++) {
+	do {
 		if (cur->set) {
-			Address_print(cur);
+			SAddress_print(cur, max_data);
 		}
-	}
+		cur = (StoredAddress*) ((void*) cur + record_size(max_data));
+	} while (--i);	
 }
 
 int main(int argc, char *argv[])
