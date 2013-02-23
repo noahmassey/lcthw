@@ -7,22 +7,22 @@
 #define MAX_DATA 512
 #define MAX_ROWS 100
 
-struct Address {
+typedef struct Address {
 	int id;
 	char *name;
 	char *email;
-};
+} Address;
 
-struct Database {
-	struct Address **rows;
+typedef struct Database {
+	Address **rows;
 	int max_data;
 	int max_rows;
-};
+} Database;
 
-struct Connection {
+typedef struct Connection {
 	FILE *file;
-	struct Database *db;
-};
+	Database *db;
+} Connection;
 
 void Database_close(struct Connection *conn);
 
