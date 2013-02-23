@@ -15,8 +15,8 @@ struct Address {
 };
 
 struct Database {
-	int max_data;
 	int max_rows;
+	int max_data;
 	struct Address *rows;
 };
 
@@ -45,9 +45,39 @@ void Address_print(struct Address *addr)
 
 void Database_load(struct Connection *conn)
 {
-	int rc = fread(conn->db, sizeof(struct Database), 1, conn->file);
-	if (rc != 1)
+	struct Database * db = conn->db;
+	struct Address *addr;
+	char * buffer;
+	int rc;
+	int i;
+	rc = fread(db, sizeof(int), 2, conn->file);
+	if (rc != 2)
 		die(conn, "Failed to load database");
+	db->rows = malloc(sizeof(struct Address) * db->max_rows);
+	buffer = malloc(sizeof(char) * db->max_data);
+	for(i = db->max_rows, addr = db->rows; i; i--,addr++) {
+		rc = fread(addr, sizeof(int), 2, conn->file);
+		if (rc != 2)
+			goto die;
+		if (! addr->set) {
+			addr->name = NULL;
+			addr->email = NULL;
+			continue;
+		}
+		rc = fread(buffer, sizeof(char), db->max_data, conn->file);
+		if (rc != db->max_data)
+			goto die;
+		addr->name = strndup(buffer, db->max_data);
+		rc = fread(buffer, sizeof(char), db->max_data, conn->file);
+		if (rc != db->max_data)
+			goto die;
+		addr->email = strndup(buffer, db->max_data);
+	}
+	free(buffer);
+	return;
+die:
+	free(buffer);
+	die(conn, "Failed to load database");
 }
 
 struct Connection *Database_open(const char *filename, char mode)
