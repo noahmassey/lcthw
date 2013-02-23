@@ -1,5 +1,6 @@
 *.swo
 *.swp
 *.swn
+*.o
 db.bat
 bin/*
