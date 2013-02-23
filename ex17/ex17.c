@@ -62,6 +62,7 @@ void Database_load(struct Connection *conn)
 		if (! addr->set) {
 			addr->name = NULL;
 			addr->email = NULL;
+			fseek(conn->file, 2 * db->max_data, SEEK_CUR);
 			continue;
 		}
 		rc = fread(buffer, sizeof(char), db->max_data, conn->file);
@@ -151,17 +152,17 @@ void Database_write(struct Connection *conn)
 			free(buffer);
 			die(conn, "Failed to write to the database");
 		}
-		if (! cur->set)
-			continue;
 		memset(buffer, 0, db->max_data);
-		strncpy(buffer, cur->name, db->max_data);
+		if (cur->name)
+			strncpy(buffer, cur->name, db->max_data);
 		rc = fwrite(buffer, sizeof(char), db->max_data, conn->file);
 		if (rc != db->max_data) {
 			free(buffer);
 			die(conn, "Failed to write to the database");
 		}
 		memset(buffer, 0, db->max_data);
-		strncpy(buffer, cur->email, db->max_data);
+		if (cur->email)
+			strncpy(buffer, cur->email, db->max_data);
 		rc = fwrite(buffer, sizeof(char), db->max_data, conn->file);
 		if (rc != db->max_data) {
 			free(buffer);
