@@ -106,11 +106,28 @@ struct Connection *Database_open(const char *filename, char mode)
 	return conn;
 }
 
+void Database_free(struct Database * db)
+{
+	if (db->rows) {
+		int i = 0;
+		while(i < db->max_rows) {
+			struct Address * addr = &db->rows[i++];
+			if (addr->name)
+				free(addr->name);
+			if (addr->email)
+				free(addr->email);
+		}
+		free(db->rows);
+	}
+	free(db);
+}
+
 void Database_close(struct Connection *conn)
 {
 	if (conn) {
 		if (conn->file) fclose(conn->file);
-		if (conn->db) free(conn->db);
+		if (conn->db)
+			Database_free(conn->db);
 		free(conn);
 	}
 }
