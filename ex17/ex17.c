@@ -117,11 +117,41 @@ void Database_close(struct Connection *conn)
 
 void Database_write(struct Connection *conn)
 {
+	int rc;
+	struct Database *db = conn->db;
+	struct Address *cur;
+	int i;
+	char * buffer;
 	rewind(conn->file);
 
-	int rc = fwrite(conn->db, sizeof(struct Database), 1, conn->file);
-	if (rc != 1) die(conn, "Failed to write to the database");
+	rc = fwrite(db, sizeof(int), 2, conn->file);
+	if (rc != 2) die(conn, "Failed to write to the database");
 
+	buffer = malloc(sizeof(char) * db->max_data);
+	for (i = db->max_rows, cur = db->rows; i != 0; i--, cur++) {
+		rc = fwrite(cur, sizeof(int), 2, conn->file);
+		if (rc != 2) {
+			free(buffer);
+			die(conn, "Failed to write to the database");
+		}
+		if (! cur->set)
+			continue;
+		memset(buffer, 0, db->max_data);
+		strncpy(buffer, cur->name, db->max_data);
+		rc = fwrite(buffer, sizeof(char), db->max_data, conn->file);
+		if (rc != db->max_data) {
+			free(buffer);
+			die(conn, "Failed to write to the database");
+		}
+		memset(buffer, 0, db->max_data);
+		strncpy(buffer, cur->email, db->max_data);
+		rc = fwrite(buffer, sizeof(char), db->max_data, conn->file);
+		if (rc != db->max_data) {
+			free(buffer);
+			die(conn, "Failed to write to the database");
+		}
+	}
+	free(buffer);
 	rc = fflush(conn->file);
 	if (rc == -1) die(conn, "Cannot flush database");
 }
