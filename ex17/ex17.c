@@ -48,8 +48,14 @@ void Address_print(Address *addr)
 void Address_delete(Address *addr)
 {
 	addr->id = -1;
-	addr->name = NULL;
-	addr->email = NULL;
+	if (addr->name) {
+		free(addr->name);
+		addr->name = NULL;
+	}
+	if (addr->email) {
+		free(addr->email);
+		addr->email = NULL;
+	}
 	printf("Record deleted\n");
 }
 
