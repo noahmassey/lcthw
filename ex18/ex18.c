@@ -173,6 +173,40 @@ int *quick_sort(int *numbers, int count, compare_cb cmp)
 	return rvalue;
 }
 
+void quick_sort_inplace(int *numbers, int start, int end, compare_cb cmp)
+{
+	int pivot;
+	int i;
+	int middle;
+	if (end <= start)
+		return;
+	pivot = numbers[end];
+	middle = start;
+	for (i = start; i < end ; i++) {
+		if (0 < cmp(pivot,numbers[i])) {
+			int tmp = numbers[i];
+			numbers[i] = numbers[middle];
+			numbers[middle] = tmp;
+			++middle;
+		}
+	}
+	// middle is index of pivot
+	numbers[end] = numbers[middle];
+	numbers[middle] = pivot;
+	quick_sort_inplace(numbers, start, middle - 1, cmp);
+	quick_sort_inplace(numbers, middle + 1, end, cmp);
+}
+
+int *quick_sort2(int *numbers, int count, compare_cb cmp)
+{
+	int *rvalue = malloc(count * sizeof(int));
+	if (! rvalue)
+		die("Memory error");
+	memcpy(rvalue, numbers, count * sizeof(int));
+	quick_sort_inplace(rvalue, 0, count - 1, cmp);
+	return rvalue;
+}
+
 int sorted_order(int a, int b)
 {
 	return a - b;
@@ -237,8 +271,9 @@ shuffle(int count, int *numbers)
 static sort_method sort_test[] = {
 	bubble_sort,
 	bubble_sort2,
-	merge_sort,
 	quick_sort,
+	quick_sort2,
+	merge_sort,
 };
 
 #define num_methods (sizeof(sort_test) / sizeof(*sort_test))
