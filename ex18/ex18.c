@@ -125,8 +125,18 @@ void test_sorting(int *numbers, int count, compare_cb cmp, sort_method sort)
 	if (!sorted)
 		die("Failed to sort as requested.");
 
-	for (i = 0; i < count; i++) {
-		printf("%d ", sorted[i]);
+	if (count <= 24) {
+		for (i = 0; i < count; i++) {
+			printf("%d ", sorted[i]);
+		}
+	} else {
+		for (i = 0; i < 12; i++) {
+			printf("%d ", sorted[i]);
+		}
+		printf("... ");
+		do {
+			printf("%d ", sorted[count - i]);
+		} while(--i);
 	}
 	printf("\n");
 
