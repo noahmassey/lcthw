@@ -1,4 +1,5 @@
 #include <sys/time.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -256,6 +257,7 @@ int main(int argc, char *argv[])
 	if (!numbers)
 		die("Memory error.");
 
+	srand((unsigned int) time(NULL));
 	for (i = 0; i < count; i++) {
 		numbers[i] = i;
 	}
