@@ -133,22 +133,36 @@ void test_sorting(int *numbers, int count, compare_cb cmp, sort_method sort)
 	free(sorted);
 }
 
+inline void
+shuffle(int count, int *numbers)
+{
+	while(count) {
+		int i = rand() % count--;
+		if (i != count) {
+			int tmp = numbers[i];
+			numbers[i] = numbers[count];
+			numbers[count] = tmp;
+		}
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	if (argc < 2)
-		die("USAGE: ex18 4 3 1 5 6");
+	if(argc != 2)
+		die("USAGE: ex18 20");
 
-	int count = argc - 1;
+	int count = atoi(argv[1]);
 	int i = 0;
-	char **inputs = argv + 1;
+
 	int *numbers = malloc(count * sizeof(int));
 	
 	if (!numbers)
 		die("Memory error.");
 
 	for (i = 0; i < count; i++) {
-		numbers[i] = atoi(inputs[i]);
+		numbers[i] = i;
 	}
+	shuffle(count, numbers);
 
 	test_sorting(numbers, count, sorted_order, bubble_sort);
 	test_sorting(numbers, count, reverse_order, bubble_sort);
