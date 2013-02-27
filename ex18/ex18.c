@@ -1,3 +1,4 @@
+#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -165,6 +166,7 @@ static sort_method sort_test[] = {
 
 int main(int argc, char *argv[])
 {
+	struct timeval times[num_methods + 1];
 	if(argc != 2)
 		die("USAGE: ex18 20");
 
@@ -181,14 +183,24 @@ int main(int argc, char *argv[])
 	}
 	shuffle(count, numbers);
 
+	printf("Results:");
 	for(i = 0; i < num_methods; i++) {
+		gettimeofday(times + i, NULL);
 		printf("\nTest %d\n", i + 1);
 		test_sorting(numbers, count, sorted_order, sort_test[i]);
 		test_sorting(numbers, count, reverse_order, sort_test[i]);
 		test_sorting(numbers, count, strange_order, sort_test[i]);
 	}
+	gettimeofday(times + num_methods, NULL);
 
 	free(numbers);
+
+	printf("\nTimes:\n");
+	for(i = 1; i <= num_methods; i++) {
+		struct timeval diff;
+		timersub(times + i, times + i - 1, &diff);
+		printf("Test %d: %ld.%09ld seconds\n", i, diff.tv_sec, diff.tv_usec);
+	}
 
 	return 0;
 }
