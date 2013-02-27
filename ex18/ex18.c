@@ -306,7 +306,7 @@ static test_method sort_test[] = {
 
 int main(int argc, char *argv[])
 {
-	if(argc != 2)
+	if(argc < 2)
 		die("USAGE: ex18 20");
 
 	int count = atoi(argv[1]);
@@ -322,8 +322,15 @@ int main(int argc, char *argv[])
 		numbers[i] = rand() % count;
 	}
 
-	for(i = 0; i < num_methods; i++) {
-		run_tests(numbers, count, &sort_test[i]);
+	if (argc == 2) {
+		for (i = 0; i < num_methods; i++)
+			run_tests(numbers, count, &sort_test[i]);
+	} else {
+		for (i = 2; i < argc; i++) {
+			int t = atoi(argv[i]);
+			if (t < num_methods)
+				run_tests(numbers, count, &sort_test[i]);
+		}
 	}
 	free(numbers);
 	return 0;
