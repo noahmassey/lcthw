@@ -268,12 +268,16 @@ shuffle(int count, int *numbers)
 	}
 }
 
-static sort_method sort_test[] = {
-	bubble_sort,
-	bubble_sort2,
-	quick_sort,
-	quick_sort2,
-	merge_sort,
+typedef struct {
+	sort_method method;
+	const char *name;
+}test_method;
+static test_method sort_test[] = {
+	{ .method = bubble_sort, .name = "Bubble Sort" },
+	{ .method = bubble_sort2, .name = "Improved Bubble Sort" },
+	{ .method = quick_sort, .name = "Quick Sort" },
+	{ .method = quick_sort2, .name = "Improved Quick Sort" },
+	{ .method = merge_sort, .name = "Merge Sort" },
 };
 
 #define num_methods (sizeof(sort_test) / sizeof(*sort_test))
@@ -300,10 +304,10 @@ int main(int argc, char *argv[])
 	printf("Results:");
 	for(i = 0; i < num_methods; i++) {
 		gettimeofday(times + i, NULL);
-		printf("\nTest %d\n", i + 1);
-		test_sorting(numbers, count, sorted_order, sort_test[i]);
-		test_sorting(numbers, count, reverse_order, sort_test[i]);
-		test_sorting(numbers, count, strange_order, sort_test[i]);
+		printf("\nTesting %s\n", sort_test[i].name);
+		test_sorting(numbers, count, sorted_order, sort_test[i].method);
+		test_sorting(numbers, count, reverse_order, sort_test[i].method);
+		test_sorting(numbers, count, strange_order, sort_test[i].method);
 	}
 	gettimeofday(times + num_methods, NULL);
 
@@ -313,7 +317,7 @@ int main(int argc, char *argv[])
 	for(i = 1; i <= num_methods; i++) {
 		struct timeval diff;
 		timersub(times + i, times + i - 1, &diff);
-		printf("Test %d: %ld.%09ld seconds\n", i, diff.tv_sec, diff.tv_usec);
+		printf("%s:\n\t%ld.%09ld seconds\n", sort_test[i-1].name, diff.tv_sec, diff.tv_usec);
 	}
 
 	return 0;
