@@ -294,9 +294,8 @@ int main(int argc, char *argv[])
 
 	srand((unsigned int) time(NULL));
 	for (i = 0; i < count; i++) {
-		numbers[i] = i;
+		numbers[i] = rand() % count;
 	}
-	shuffle(count, numbers);
 
 	printf("Results:");
 	for(i = 0; i < num_methods; i++) {
