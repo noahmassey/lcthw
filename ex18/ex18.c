@@ -154,6 +154,10 @@ int main(int argc, char *argv[])
 	test_sorting(numbers, count, reverse_order, bubble_sort);
 	test_sorting(numbers, count, strange_order, bubble_sort);
 
+	test_sorting(numbers, count, sorted_order, merge_sort);
+	test_sorting(numbers, count, reverse_order, merge_sort);
+	test_sorting(numbers, count, strange_order, merge_sort);
+
 	free(numbers);
 
 	return 0;
