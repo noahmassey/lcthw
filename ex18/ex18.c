@@ -156,6 +156,13 @@ shuffle(int count, int *numbers)
 	}
 }
 
+static sort_method sort_test[] = {
+	bubble_sort,
+	merge_sort,
+};
+
+#define num_methods (sizeof(sort_test) / sizeof(*sort_test))
+
 int main(int argc, char *argv[])
 {
 	if(argc != 2)
@@ -174,13 +181,12 @@ int main(int argc, char *argv[])
 	}
 	shuffle(count, numbers);
 
-	test_sorting(numbers, count, sorted_order, bubble_sort);
-	test_sorting(numbers, count, reverse_order, bubble_sort);
-	test_sorting(numbers, count, strange_order, bubble_sort);
-
-	test_sorting(numbers, count, sorted_order, merge_sort);
-	test_sorting(numbers, count, reverse_order, merge_sort);
-	test_sorting(numbers, count, strange_order, merge_sort);
+	for(i = 0; i < num_methods; i++) {
+		printf("\nTest %d\n", i + 1);
+		test_sorting(numbers, count, sorted_order, sort_test[i]);
+		test_sorting(numbers, count, reverse_order, sort_test[i]);
+		test_sorting(numbers, count, strange_order, sort_test[i]);
+	}
 
 	free(numbers);
 
