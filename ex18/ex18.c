@@ -121,6 +121,57 @@ int *merge_sort(int *numbers, int count, compare_cb cmp)
 	return rvalue;
 }
 
+int *quick_sort_merge(int * numbers1, int count1, int *numbers2, int count2, int pivot)
+{
+	int *rvalue = malloc((count1 + count2 + 1) * sizeof(int));
+	if (!rvalue)
+		die("Memory error.");
+	memcpy(rvalue, numbers1, count1 * sizeof(int));
+	rvalue[count1] = pivot;
+	memcpy(rvalue + count1 + 1, numbers2, count2 * sizeof(int));
+	return rvalue;
+}
+
+int *quick_sort(int *numbers, int count, compare_cb cmp)
+{
+	int *rvalue;
+	int pivot = numbers[--count];
+	if (! count) {
+		// end of recursion
+		rvalue = malloc(sizeof(int));
+		if (!rvalue)
+			die("Memory error.");
+		*rvalue = pivot;
+	} else {
+		int lc = 0;
+		int rc = 0;
+		int *left = malloc(count * sizeof(int));
+		int *right = malloc(count * sizeof(int));
+		while(count--) {
+			if (cmp(pivot,*numbers) > 0) {
+				left[lc++] = *numbers;
+			} else {
+				right[rc++] = *numbers;
+			}
+			numbers++;
+		}
+		if (lc) {
+			int * tmp = quick_sort(left, lc, cmp);
+			free(left);
+			left = tmp;
+		}
+		if (rc) {
+			int * tmp = quick_sort(right, rc, cmp);
+			free(right);
+			right = tmp;
+		}
+		rvalue = quick_sort_merge(left, lc, right, rc, pivot);
+		free(left);
+		free(right);
+	}
+	return rvalue;
+}
+
 int sorted_order(int a, int b)
 {
 	return a - b;
@@ -186,6 +237,7 @@ static sort_method sort_test[] = {
 	bubble_sort,
 	bubble_sort2,
 	merge_sort,
+	quick_sort,
 };
 
 #define num_methods (sizeof(sort_test) / sizeof(*sort_test))
