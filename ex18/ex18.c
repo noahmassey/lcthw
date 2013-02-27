@@ -49,6 +49,52 @@ int *bubble_sort(int *numbers, int count, compare_cb cmp)
 	return target;
 }
 
+// we could do this inline, but it's easier to read this way
+int *merge_sorted(int * numbers1, int count1, int *numbers2, int count2, compare_cb cmp)
+{
+	int * rvalue;
+	int * tmp;
+
+	rvalue = malloc((count1 + count2) * sizeof(int));
+	if (!rvalue) die("Memory error");
+	for(tmp = rvalue; count1 && count2; tmp++) {
+		if (cmp(*numbers1, *numbers2) > 0) {
+			*tmp = *(numbers2++);
+			if (! --count2) {
+				memcpy(tmp + 1, numbers1, count1 * sizeof(int));
+			}
+		} else {
+			*tmp = *(numbers1++);
+			if (! --count1) {
+				memcpy(tmp + 1, numbers2, count2 * sizeof(int));
+			}
+		}
+	}
+	return rvalue;
+}
+
+/* merge sort :: classing recursive algorythm */
+int *merge_sort(int *numbers, int count, compare_cb cmp)
+{
+	int *rvalue;
+	if (count == 1) {
+		// end of recursion
+		rvalue = malloc(sizeof(int));
+		if (!rvalue) die("Memory error.");
+		*rvalue = *numbers;
+	} else {
+		int i = count / 2;
+		int j = i + count % 2;
+		int * left = merge_sort(numbers, i, cmp);
+		int * right = merge_sort(numbers + i, j, cmp);
+		// this delays the allocation for rvalue until the parts have been sorted
+		rvalue = merge_sorted(left, i, right, j, cmp);
+		free(left);
+		free(right);
+	}
+	return rvalue;
+}
+
 int sorted_order(int a, int b)
 {
 	return a - b;
