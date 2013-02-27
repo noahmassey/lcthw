@@ -50,6 +50,31 @@ int *bubble_sort(int *numbers, int count, compare_cb cmp)
 	return target;
 }
 
+int *bubble_sort2(int *numbers, int count, compare_cb cmp)
+{
+	int temp = 0;
+	int i = 0;
+	int j = 0;
+	int *target = malloc(count * sizeof(int));
+
+	if(!target) die("Memory error.");
+
+	memcpy(target, numbers, count * sizeof(int));
+
+	for(i = count - 1; i ; i--) {
+		for(j = 0; j < i; j++) {
+			if(cmp(target[j], target[j+1]) > 0) {
+				temp = target[j+1];
+				target[j+1] = target[j];
+				target[j] = temp;
+			}
+		}
+	}
+
+	return target;
+}
+
+
 // we could do this inline, but it's easier to read this way
 int *merge_sorted(int * numbers1, int count1, int *numbers2, int count2, compare_cb cmp)
 {
@@ -159,6 +184,7 @@ shuffle(int count, int *numbers)
 
 static sort_method sort_test[] = {
 	bubble_sort,
+	bubble_sort2,
 	merge_sort,
 };
 
