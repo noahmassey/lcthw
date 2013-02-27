@@ -226,20 +226,28 @@ int strange_order(int a, int b)
  * Used to test that we are sorting things correctly
  * by doing the sort and printing it out
  */
+
+#define OUTPUT_MAX 20
 void test_sorting(int *numbers, int count, compare_cb cmp, sort_method sort)
 {
 	int i = 0;
-	int *sorted = sort(numbers, count, cmp);
+	int *sorted;
+	struct timeval start;
+	struct timeval end;
+	struct timeval diff;
 
+	gettimeofday(&start, NULL);
+	sorted = sort(numbers, count, cmp);
+	gettimeofday(&end, NULL);
 	if (!sorted)
 		die("Failed to sort as requested.");
 
-	if (count <= 24) {
+	if (count <= OUTPUT_MAX) {
 		for (i = 0; i < count; i++) {
 			printf("%d ", sorted[i]);
 		}
 	} else {
-		for (i = 0; i < 12; i++) {
+		for (i = 0; i < OUTPUT_MAX / 2; i++) {
 			printf("%d ", sorted[i]);
 		}
 		printf("... ");
@@ -247,9 +255,9 @@ void test_sorting(int *numbers, int count, compare_cb cmp, sort_method sort)
 			printf("%d ", sorted[count - i]);
 		} while(--i);
 	}
-	printf("\n");
-
 	free(sorted);
+	timersub(&end, &start, &diff);
+	printf("\n\t%ld.%09ld seconds\n", diff.tv_sec, diff.tv_usec);
 }
 
 inline void
@@ -310,11 +318,11 @@ int main(int argc, char *argv[])
 
 	free(numbers);
 
-	printf("\nTimes:\n");
+	printf("\nTotals:\n");
 	for(i = 1; i <= num_methods; i++) {
 		struct timeval diff;
 		timersub(times + i, times + i - 1, &diff);
-		printf("%s:\n\t%ld.%09ld seconds\n", sort_test[i-1].name, diff.tv_sec, diff.tv_usec);
+		printf("t%ld.%09ld\t(%s)\n", diff.tv_sec, diff.tv_usec, sort_test[i-1].name);
 	}
 
 	return 0;
