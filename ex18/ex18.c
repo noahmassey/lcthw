@@ -242,6 +242,8 @@ void test_sorting(int *numbers, int count, compare_cb cmp, sort_method sort)
 	if (!sorted)
 		die("Failed to sort as requested.");
 
+	timersub(&end, &start, &diff);
+	printf("% 8ld.%09ld seconds: ", diff.tv_sec, diff.tv_usec);
 	if (count <= OUTPUT_MAX) {
 		for (i = 0; i < count; i++) {
 			printf("%d ", sorted[i]);
@@ -256,8 +258,7 @@ void test_sorting(int *numbers, int count, compare_cb cmp, sort_method sort)
 		} while(--i);
 	}
 	free(sorted);
-	timersub(&end, &start, &diff);
-	printf("\n\t%ld.%09ld seconds\n", diff.tv_sec, diff.tv_usec);
+	printf("\n");
 }
 
 inline void
@@ -277,6 +278,22 @@ typedef struct {
 	sort_method method;
 	const char *name;
 }test_method;
+
+void run_tests(int * numbers, int count, test_method * test)
+{
+	struct timeval start;
+	struct timeval end;
+	struct timeval diff;
+	printf("Testing %s:\n", test->name);
+	gettimeofday(&start, NULL);
+	test_sorting(numbers, count, sorted_order, test->method);
+	test_sorting(numbers, count, reverse_order, test->method);
+	test_sorting(numbers, count, strange_order, test->method);
+	gettimeofday(&end, NULL);
+	timersub(&end, &start, &diff);
+	printf("% 8ld.%09ld seconds: (Total)\n", diff.tv_sec, diff.tv_usec);
+}
+
 static test_method sort_test[] = {
 	{ .method = bubble_sort, .name = "Bubble Sort" },
 	{ .method = bubble_sort2, .name = "Improved Bubble Sort" },
@@ -289,7 +306,6 @@ static test_method sort_test[] = {
 
 int main(int argc, char *argv[])
 {
-	struct timeval times[num_methods + 1];
 	if(argc != 2)
 		die("USAGE: ex18 20");
 
@@ -306,24 +322,9 @@ int main(int argc, char *argv[])
 		numbers[i] = rand() % count;
 	}
 
-	printf("Results:");
 	for(i = 0; i < num_methods; i++) {
-		gettimeofday(times + i, NULL);
-		printf("\nTesting %s\n", sort_test[i].name);
-		test_sorting(numbers, count, sorted_order, sort_test[i].method);
-		test_sorting(numbers, count, reverse_order, sort_test[i].method);
-		test_sorting(numbers, count, strange_order, sort_test[i].method);
+		run_tests(numbers, count, &sort_test[i]);
 	}
-	gettimeofday(times + num_methods, NULL);
-
 	free(numbers);
-
-	printf("\nTotals:\n");
-	for(i = 1; i <= num_methods; i++) {
-		struct timeval diff;
-		timersub(times + i, times + i - 1, &diff);
-		printf("t%ld.%09ld\t(%s)\n", diff.tv_sec, diff.tv_usec, sort_test[i-1].name);
-	}
-
 	return 0;
 }
